@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+    <div class="glass-panel p-8 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden">
+        <!-- Glow effect -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-primary/20 blur-3xl rounded-full -z-10 pointer-events-none"></div>
+        
+        <div class="text-center mb-8">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="MindPulse AI Logo" class="w-16 h-16 rounded-xl mx-auto mb-4 shadow-lg shadow-purple-500/30">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">MindPulse AI</h1>
+            <p class="text-gray-400 mt-2 text-sm">Welcome back! Please enter your details.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}" class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <input type="text" name="username" required class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-lg py-2.5 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all placeholder-gray-500" placeholder="Enter your username">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <input type="password" name="password" required class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-lg py-2.5 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all placeholder-gray-500" placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary text-white font-medium py-2.5 rounded-lg shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-primary/50 active:scale-[0.98]">
+                Sign In
+            </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-gray-400">
+            Don't have an account? 
+            <a href="{{ url_for('signup') }}" class="text-purple-400 hover:text-purple-300 font-medium transition-colors">Sign up</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

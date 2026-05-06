@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex h-screen overflow-hidden">
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden md:hidden transition-opacity opacity-0"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 glass-panel border-r border-glassBorder flex-shrink-0 flex flex-col transition-transform duration-300 z-50 fixed md:relative inset-y-0 left-0 transform -translate-x-full md:translate-x-0">
+        <div class="p-6 flex items-center gap-3">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="MindPulse AI Logo" class="w-10 h-10 rounded-lg shadow-lg shadow-purple-500/20">
+            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">MindPulse AI</h2>
+        </div>
+        <nav class="flex-1 px-4 space-y-2 mt-4 sidebar-nav">
+            <a href="#" data-target="dashboard" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/20 text-white font-medium border border-primary/30 transition-colors">
+                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+            </a>
+            <a href="#" data-target="insights" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-colors border border-transparent">
+                <i class="fa-solid fa-lightbulb w-5"></i> Insights
+            </a>
+            <a href="#" data-target="reports" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-colors border border-transparent">
+                <i class="fa-solid fa-chart-line w-5"></i> Reports
+            </a>
+            <a href="#" data-target="settings" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-colors border border-transparent">
+                <i class="fa-solid fa-gear w-5"></i> Settings
+            </a>
+            <div class="border-t border-glassBorder my-3"></div>
+            <a href="#" data-target="chrome" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-colors border border-transparent">
+                <i class="fa-brands fa-chrome w-5"></i> Chrome Analysis
+            </a>
+            <a href="#" data-target="streaks" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-glass transition-colors border border-transparent">
+                <i class="fa-solid fa-fire w-5 text-orange-400"></i> Habit Streaks
+            </a>
+        </nav>
+        <div class="p-4 border-t border-glassBorder">
+            <div class="flex items-center justify-between px-4 py-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-sm font-bold shadow-lg shadow-purple-500/20">
+                        {{ user.username[0]|upper }}
+                    </div>
+                    <span class="text-sm font-medium text-gray-300 truncate">{{ user.username }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="text-gray-500 hover:text-red-400 transition-colors" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative w-full">
+        
+        <!-- HEADER (Shared across tabs) -->
+        <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white mb-1" id="page-title">Welcome back, {{ user.username }}!</h1>
+                    <p class="text-sm md:text-base text-gray-400" id="page-subtitle">Track your activities and get AI-powered insights.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="glass-card px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer border border-glassBorder hover:border-purple-500/50 transition-colors" id="roast-toggle-btn">
+                    <i class="fa-solid fa-fire text-orange-500"></i>
+                    <span class="text-sm font-medium">Roast Mode</span>
+                    <div class="w-8 h-4 bg-slate-700 rounded-full ml-2 relative transition-colors duration-300" id="roast-toggle">
+                        <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform duration-300 transform translate-x-0" id="roast-indicator"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- TAB: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content block animate-slide-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Input Section -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full -z-10 pointer-events-none"></div>
+                        <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-blue-400"></i> Log Today's Activity
+                        </h3>
+                        
+                        <form id="activity-form" class="space-y-6">
+                            <!-- Sliders -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <label class="text-sm font-medium text-gray-300">Study Hours</label>
+                                    <span class="text-sm font-bold text-indigo-400" id="study-val">0h</span>
+                                </div>
+                                <input type="range" id="study-slider" min="0" max="16" step="0.5" value="0">
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <label class="text-sm font-medium text-gray-300">Work Hours</label>
+                                    <span class="text-sm font-bold text-indigo-400" id="work-val">0h</span>
+                                </div>
+                                <input type="range" id="work-slider" min="0" max="16" step="0.5" value="0">
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <label class="text-sm font-medium text-gray-300">Screen Time</label>
+                                    <span class="text-sm font-bold text-purple-400" id="screen-val">0h</span>
+                                </div>
+                                <input type="range" id="screen-slider" min="0" max="24" step="0.5" value="0">
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <label class="text-sm font-medium text-gray-300">Distraction Time</label>
+                                    <span class="text-sm font-bold text-red-400" id="distraction-val">0h</span>
+                                </div>
+                                <input type="range" id="distraction-slider" min="0" max="12" step="0.5" value="0">
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <label class="text-sm font-medium text-gray-300">Sleep Hours</label>
+                                    <span class="text-sm font-bold text-blue-400" id="sleep-val">8h</span>
+                                </div>
+                                <input type="range" id="sleep-slider" min="0" max="14" step="0.5" value="8">
+                            </div>
+
+                            <button type="submit" id="submit-btn" class="w-full mt-4 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary text-white font-medium py-3 rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-primary/40 active:scale-[0.98] flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Analysis
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Visualization & Output Section -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Top Row: Score & Charts -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Score Card -->
+                        <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder flex flex-col items-center justify-center relative overflow-hidden h-64">
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/50 -z-10 pointer-events-none"></div>
+                            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Productivity Score</h3>
+                            
+                            <div class="progress-circle" id="score-circle">
+                                <span class="progress-value text-white" id="score-text">--</span>
+                            </div>
+                            <p class="mt-4 text-sm font-medium" id="score-status-text">Awaiting data...</p>
+                        </div>
+
+                        <!-- Pie Chart Card -->
+                        <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder h-64 flex flex-col overflow-hidden">
+                            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 flex-shrink-0">Time Distribution</h3>
+                            <div class="flex-1 relative w-full min-h-0 flex justify-center items-center">
+                                <canvas id="timePieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trend Chart -->
+                    <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder">
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Weekly Trend</h3>
+                        <div class="w-full h-64">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: INSIGHTS -->
+        <div id="tab-insights" class="tab-content hidden animate-slide-in space-y-8">
+            <!-- AI Insights Panel -->
+            <div class="glass-card rounded-2xl p-8 shadow-xl border border-glassBorder relative overflow-hidden min-h-[400px]">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full -z-10 pointer-events-none"></div>
+                <div class="flex items-center gap-4 mb-8 border-b border-glassBorder pb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                        <i class="fa-solid fa-robot text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Latest AI Insights</h3>
+                        <p class="text-gray-400 text-sm">Deep analysis of your most recent activity log.</p>
+                    </div>
+                    <div id="ai-loading" class="hidden ml-auto flex items-center gap-2 text-purple-400 bg-purple-500/10 px-4 py-2 rounded-full border border-purple-500/20">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Generating Analysis...
+                    </div>
+                </div>
+
+                <div id="insights-content" class="space-y-8">
+                    <div class="flex flex-col items-center justify-center h-48 text-center">
+                        <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-clipboard-list text-2xl text-gray-500"></i>
+                        </div>
+                        <p class="text-gray-400 text-lg">No insights generated yet.</p>
+                        <p class="text-gray-500 text-sm mt-1">Go to the Dashboard and submit your daily log to see AI analysis here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: REPORTS -->
+        <div id="tab-reports" class="tab-content hidden animate-slide-in space-y-6">
+            <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-white">Activity History</h3>
+                    <a href="/export-csv" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors border border-slate-600 inline-flex items-center">
+                        <i class="fa-solid fa-download mr-2"></i> Export CSV
+                    </a>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-glassBorder text-gray-400 text-sm">
+                                <th class="pb-3 px-4 font-medium">Date</th>
+                                <th class="pb-3 px-4 font-medium text-center">Score</th>
+                                <th class="pb-3 px-4 font-medium">Productive (h)</th>
+                                <th class="pb-3 px-4 font-medium">Distracted (h)</th>
+                                <th class="pb-3 px-4 font-medium">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body" class="text-sm">
+                            <!-- Populated via JS -->
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-gray-500 italic">Load history to see records.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: SETTINGS -->
+        <div id="tab-settings" class="tab-content hidden animate-slide-in space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder">
+                    <h3 class="text-lg font-bold text-white mb-4 border-b border-glassBorder pb-3">Account Profile</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Username</label>
+                            <input type="text" value="{{ user.username }}" disabled class="w-full bg-slate-800/50 border border-slate-700 text-gray-300 rounded-lg py-2 px-3 opacity-70 cursor-not-allowed">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4"><i class="fa-solid fa-circle-info"></i> Username changes are not currently supported in this version.</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 shadow-xl border border-red-500/20 bg-red-500/5">
+                    <h3 class="text-lg font-bold text-red-400 mb-4 border-b border-red-500/20 pb-3">Danger Zone</h3>
+                    <p class="text-sm text-gray-300 mb-4">Once you delete your account or clear data, there is no going back. Please be certain.</p>
+                    
+                    <div class="space-y-3">
+                        <button onclick="clearAllLogs()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg transition-colors border border-slate-700">
+                            Clear All Activity Logs
+                        </button>
+                        <button onclick="showToast('Account deletion is disabled in demo mode', 'danger')" class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 py-2 rounded-lg transition-colors border border-red-500/30">
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: CHROME HISTORY ANALYSIS -->
+        <div id="tab-chrome" class="tab-content hidden animate-slide-in space-y-6">
+            <!-- Browser Extension Connection -->
+            <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder bg-gradient-to-br from-slate-900/80 to-purple-900/20">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-puzzle-piece text-purple-400"></i> Browser Intelligence Extension
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">Sync your browsing activity securely via our Chrome Extension.</p>
+                    </div>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <a href="/download-extension" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg text-sm transition-all border border-green-500/50 shadow-lg shadow-green-500/20 inline-flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fa-solid fa-download"></i> Download Extension
+                        </a>
+                        <button onclick="document.getElementById('install-guide').classList.toggle('hidden')" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors border border-slate-600 inline-flex items-center gap-2">
+                            <i class="fa-solid fa-book-open text-yellow-400"></i> Installation Guide
+                        </button>
+                        <button onclick="generateBrowserToken()" id="btn-generate-token" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm transition-colors border border-indigo-500/50 shadow-lg shadow-indigo-500/20">
+                            <i class="fa-solid fa-key mr-1"></i> Generate Token
+                        </button>
+                        <button onclick="revokeBrowserToken()" id="btn-revoke-token" class="hidden bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg text-sm transition-colors border border-red-500/30">
+                            Revoke Active Token
+                        </button>
+                        <button onclick="loadChromeHistory()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors border border-slate-600">
+                            <i class="fa-solid fa-rotate mr-1"></i> Refresh Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step-by-Step Installation Guide -->
+                <div id="install-guide" class="hidden mt-4 p-5 rounded-xl bg-slate-900/90 border border-purple-500/30 animate-slide-in">
+                    <h4 class="text-white font-bold text-base mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-list-ol text-purple-400"></i> How to Install MindPulse Extension
+                    </h4>
+                    <div class="space-y-4">
+                        <div class="flex gap-3 items-start">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">1</span>
+                            <div>
+                                <p class="text-sm text-white font-medium">Download the Extension</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Click the <strong class="text-green-400">Download Extension</strong> button above. A <code class="text-indigo-300 bg-black/30 px-1 rounded">MindPulse_Extension.zip</code> file will be saved to your Downloads folder.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">2</span>
+                            <div>
+                                <p class="text-sm text-white font-medium">Extract the ZIP File</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Right-click the downloaded ZIP → <strong class="text-gray-200">Extract All</strong>. Remember the extracted folder location.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">3</span>
+                            <div>
+                                <p class="text-sm text-white font-medium">Open Chrome Extensions Page</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Open a new tab in Chrome and go to <code class="text-indigo-300 bg-black/30 px-1.5 py-0.5 rounded select-all cursor-pointer">chrome://extensions/</code></p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">4</span>
+                            <div>
+                                <p class="text-sm text-white font-medium">Enable Developer Mode</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Toggle <strong class="text-yellow-400">Developer mode</strong> ON using the switch in the top-right corner of the extensions page.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">5</span>
+                            <div>
+                                <p class="text-sm text-white font-medium">Load the Extension</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Click <strong class="text-gray-200">Load unpacked</strong> → Select the extracted folder containing <code class="text-indigo-300 bg-black/30 px-1 rounded">manifest.json</code>. The extension will appear in your extensions list.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-start">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">6</span>
+                            <div>
+                                <p class="text-sm text-white font-medium">Pin & Configure</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Click the <i class="fa-solid fa-puzzle-piece text-gray-300 text-xs"></i> puzzle icon in Chrome toolbar → <strong class="text-gray-200">Pin</strong> MindPulse. Open it, paste your <strong class="text-indigo-400">API Token</strong> and <strong class="text-indigo-400">Backend URL</strong>, then click <strong class="text-green-400">Sync Now</strong>!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                        <p class="text-xs text-indigo-300"><i class="fa-solid fa-lightbulb mr-1 text-yellow-400"></i> <strong>Tip:</strong> Generate a token using the <strong>Generate Token</strong> button above, then use it in the extension popup along with your Backend URL: <code class="text-gray-300 select-all">{{ request.host_url }}</code></p>
+                    </div>
+                </div>
+
+                <div id="token-display-area" class="hidden mt-4 p-4 rounded-xl bg-slate-900/80 border border-indigo-500/30">
+                    <p class="text-sm text-green-400 mb-2"><i class="fa-solid fa-check-circle mr-1"></i> Token generated successfully! Copy it now, it will not be shown again.</p>
+                    <div class="flex items-center gap-2 mb-3">
+                        <code id="raw-token-display" class="bg-black/50 text-indigo-300 px-3 py-2 rounded flex-1 font-mono text-sm border border-slate-800 break-all"></code>
+                        <button onclick="copyToken()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded transition-colors" title="Copy Token">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-4 border-t border-glassBorder pt-4 flex items-center justify-between">
+                    <p class="text-xs text-gray-500 italic"><i class="fa-solid fa-shield-halved mr-1"></i> Browser data is synced only after user permission through the Chrome Extension.</p>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="chrome-empty-state" class="hidden glass-card rounded-2xl p-10 shadow-xl border border-glassBorder text-center">
+                <div class="w-20 h-20 mx-auto bg-slate-800/50 rounded-full flex items-center justify-center mb-4 border border-slate-700">
+                    <i class="fa-brands fa-chrome text-4xl text-gray-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">No Browser Data Found</h3>
+                <p class="text-gray-400 max-w-md mx-auto mb-6">Install the MindPulse Browser Extension and sync your activity to view deep insights into your browsing habits.</p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Productive Visits</p>
+                    <p class="text-3xl font-bold text-green-400" id="chrome-productive">0</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Distraction Visits</p>
+                    <p class="text-3xl font-bold text-red-400" id="chrome-distraction">0</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Total Visits</p>
+                    <p class="text-3xl font-bold text-purple-400" id="chrome-total">0</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top Sites -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-ranking-star text-yellow-400"></i> Top 10 Sites
+                        </h3>
+                        <select id="chrome-hours" onchange="loadChromeHistory()" class="bg-slate-800 border border-slate-700 text-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+                            <option value="24">Last 24h</option>
+                            <option value="72">Last 3 days</option>
+                            <option value="168">Last 7 days</option>
+                        </select>
+                    </div>
+                    <div id="chrome-top-sites" class="space-y-2">
+                        <p class="text-gray-500 text-sm italic text-center py-6">Click to load Chrome history...</p>
+                    </div>
+                </div>
+
+                <!-- Browsing Pie Chart -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-blue-400"></i> Browsing Categories
+                    </h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="chromePieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chrome-error" class="hidden glass-card rounded-2xl p-6 shadow-xl border border-orange-500/30 bg-orange-500/5">
+                <p class="text-orange-400 text-sm"><i class="fa-solid fa-triangle-exclamation mr-2"></i><span id="chrome-error-msg"></span></p>
+            </div>
+        </div>
+
+        <!-- TAB: HABIT STREAKS -->
+        <div id="tab-streaks" class="tab-content hidden animate-slide-in space-y-6">
+            <!-- Streak Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center relative overflow-hidden">
+                    <div class="absolute -right-2 -top-2 text-orange-500/10 text-6xl"><i class="fa-solid fa-fire"></i></div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Current Streak</p>
+                    <p class="text-4xl font-bold text-orange-400" id="streak-current">0</p>
+                    <p class="text-xs text-gray-500 mt-1">days</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Longest Streak</p>
+                    <p class="text-4xl font-bold text-yellow-400" id="streak-longest">0</p>
+                    <p class="text-xs text-gray-500 mt-1">days</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Total Logs</p>
+                    <p class="text-4xl font-bold text-blue-400" id="streak-total">0</p>
+                    <p class="text-xs text-gray-500 mt-1">entries</p>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-xl border border-glassBorder text-center">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Avg Score</p>
+                    <p class="text-4xl font-bold text-purple-400" id="streak-avg">0</p>
+                    <p class="text-xs text-gray-500 mt-1">/ 100</p>
+                </div>
+            </div>
+
+            <!-- Heatmap -->
+            <div class="glass-card rounded-2xl p-6 shadow-xl border border-glassBorder">
+                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-green-400"></i> Activity Heatmap (Last 90 Days)
+                </h3>
+                <div id="heatmap-container" class="flex flex-wrap gap-1 justify-center">
+                    <p class="text-gray-500 text-sm italic">Loading heatmap...</p>
+                </div>
+                <div class="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
+                    <span>Less</span>
+                    <div class="w-3 h-3 rounded-sm bg-slate-800 border border-slate-700"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-900"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-700"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-500"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-400"></div>
+                    <span>More</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Template for AI Insights -->
+<template id="insights-template">
+    <div class="space-y-8 animate-slide-in">
+        <div id="roast-container" class="hidden p-5 rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 shadow-[0_0_20px_rgba(249,115,22,0.15)] relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 text-orange-500/10 text-8xl"><i class="fa-solid fa-fire"></i></div>
+            <h4 class="text-orange-400 font-bold mb-3 flex items-center gap-2 text-lg">
+                <i class="fa-solid fa-fire-flame-curved"></i> Roast Mode
+            </h4>
+            <p class="text-gray-200 italic ai-roast text-lg leading-relaxed relative z-10 font-medium"></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700/50">
+                <h4 class="text-indigo-400 font-bold mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> Daily Summary
+                </h4>
+                <p class="text-gray-300 leading-relaxed ai-summary"></p>
+            </div>
+
+            <div class="bg-slate-800/40 p-5 rounded-xl border border-slate-700/50">
+                <h4 class="text-purple-400 font-bold mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-brain"></i> Behavioral Analysis
+                </h4>
+                <p class="text-gray-300 leading-relaxed ai-behavior"></p>
+            </div>
+        </div>
+
+        <div class="bg-green-500/5 p-5 rounded-xl border border-green-500/20">
+            <h4 class="text-green-400 font-bold mb-4 flex items-center gap-2 text-lg">
+                <i class="fa-solid fa-compass"></i> Actionable Suggestions
+            </h4>
+            <ul class="space-y-3 ai-suggestions grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                <!-- Injected via JS -->
+            </ul>
+        </div>
+    </div>
+</template>
+{% endblock %}

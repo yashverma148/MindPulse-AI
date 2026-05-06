@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>MindPulse AI Sync</h2>
+      <p>Securely sync your browser history.</p>
+    </div>
+
+    <div class="form-group">
+      <label for="backendUrl">Backend URL</label>
+      <input type="text" id="backendUrl" placeholder="https://your-mindpulse-app.onrender.com" />
+    </div>
+
+    <div class="form-group">
+      <label for="apiToken">Browser Sync Token</label>
+      <input type="password" id="apiToken" placeholder="mp_live_..." />
+    </div>
+
+    <div class="form-group">
+      <label for="timeRange">Time Range</label>
+      <select id="timeRange">
+        <option value="24">Last 24 Hours</option>
+        <option value="72">Last 3 Days</option>
+        <option value="168">Last 7 Days</option>
+      </select>
+    </div>
+
+    <div class="form-group toggle-group">
+      <label for="autoSync">Auto Sync (Every 1 Hour)</label>
+      <label class="switch">
+        <input type="checkbox" id="autoSync">
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <button id="syncBtn" class="btn">Sync Now</button>
+
+    <div id="status" class="status-msg"></div>
+    
+    <div class="footer">
+      <p id="lastSync">Last synced: Never</p>
+      <p class="privacy-note">Only sanitized domain-level data is sent.</p>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
