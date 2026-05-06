@@ -69,9 +69,27 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tab-' + targetId).classList.add('block');
 
             // Auto-load data when tab is opened
-            if (targetId === 'chrome' && !chromeLoaded) {
-                loadChromeHistory();
+            if (targetId === 'chrome') {
+                if (!chromeLoaded) {
+                    loadChromeHistory();
+                } else {
+                    loadChromeHistory(true); // silent refresh
+                }
+                
+                // Start auto-refresh polling every 5 seconds
+                if (!window.chromeSyncInterval) {
+                    window.chromeSyncInterval = setInterval(() => {
+                        loadChromeHistory(true);
+                    }, 5000);
+                }
+            } else {
+                // Clear interval when switching away from chrome tab
+                if (window.chromeSyncInterval) {
+                    clearInterval(window.chromeSyncInterval);
+                    window.chromeSyncInterval = null;
+                }
             }
+            
             if (targetId === 'streaks' && !streakLoaded) {
                 loadStreakData();
             }
@@ -520,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- CHROME HISTORY ANALYSIS ---
-    window.loadChromeHistory = async function() {
+    window.loadChromeHistory = async function(isSilent = false) {
         const hoursSelect = document.getElementById('chrome-hours');
         const hours = hoursSelect ? hoursSelect.value : 24;
         const topSitesContainer = document.getElementById('chrome-top-sites');
@@ -528,7 +546,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const errorMsg = document.getElementById('chrome-error-msg');
         const emptyState = document.getElementById('chrome-empty-state');
 
-        topSitesContainer.innerHTML = '<div class="skeleton h-6 w-full rounded mb-2"></div>'.repeat(5);
+        if (!isSilent) {
+            topSitesContainer.innerHTML = '<div class="skeleton h-6 w-full rounded mb-2"></div>'.repeat(5);
+        }
         errorContainer.classList.add('hidden');
         if (emptyState) emptyState.classList.add('hidden');
 
