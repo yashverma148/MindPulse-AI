@@ -35,6 +35,9 @@ Unlike traditional productivity trackers, MindPulse AI transforms real behaviora
 
 # 📄 Product Showcase
 
+<img width="1920" height="1080" alt="Screenshot 2026-05-06 132230" src="https://github.com/user-attachments/assets/3972624b-7b9d-4c18-9c14-3ad7919e1019" />
+
+
 Explore the complete MindPulse AI SaaS interface, analytics system, AI insights engine, browser intelligence module, and productivity tracking workflow.
 
 <p align="center">
