@@ -234,7 +234,7 @@ def clear_logs():
 @app.route('/download-extension')
 def download_extension():
     """Serve the MindPulse browser extension as a downloadable ZIP."""
-    zip_path = os.path.join(BASE_DIR, 'MindPulse_Extension.zip')
+    zip_path = os.path.join(BASE_DIR, 'static', 'MindPulse_Extension.zip')
     if not os.path.exists(zip_path):
         return jsonify({'error': 'Extension file not found'}), 404
     return send_file(
